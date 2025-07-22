@@ -31,6 +31,10 @@ func main() {
 	userService := service.NewUserService(userRepository)
 	userHandler := handler.NewUserHandler(userService)
 
+	productRepository := repository.NewProductRepository(db)
+	productService := service.NewProductService(productRepository)
+	productHandler := handler.NewProductHandler(productService)
+
 	// Home page.
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Welcome to Meet factures."))
@@ -38,6 +42,8 @@ func main() {
 
 	r.Post("/register", userHandler.Register())
 	r.Post("/login", userHandler.Login())
+
+	r.Get("/products", productHandler.GetAllProducts())
 
 	fmt.Println("Server up and running on the port", envConfigs.ServicePort)
 	http.ListenAndServe(":"+envConfigs.ServicePort, r)

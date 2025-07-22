@@ -17,3 +17,13 @@ type UserRegistration struct {
 	Phone    string `json:"phone" validate:"required,min=5,max=20"`
 	Address  string `json:"address" validate:"min=3,max=150"`
 }
+
+type UserLogin struct {
+	Name     string `json:"name"`
+	Password string `json:"password" validate:"required,min=3,max=20"`
+	Phone    string `json:"phone" validate:"required,min=5,max=20"`
+}
+
+type AuthResponse struct {
+	Token string `json:"token"`
+}

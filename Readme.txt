@@ -15,3 +15,6 @@ Init .air.toml file:
 
 Run project with air:
     $ ~/go/bin/air
+
+
+select products.id, products.name, categories.name as wer from products left join categories on products.category_id = categories.id

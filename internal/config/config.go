@@ -16,6 +16,8 @@ type EnvConfig struct {
 	DbName     string `env:"DB_NAME"`
 
 	ServicePort string `env:"SERVICE_PORT"`
+
+	AuthSecret string `env:"AUTH_SECRET"`
 }
 
 func NewEnvConfig() (*EnvConfig, error) {

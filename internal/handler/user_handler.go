@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/Vladimir5577/go_shop_meat_factures/internal/helper"
@@ -31,7 +30,7 @@ func (h *UserHandler) Register() http.HandlerFunc {
 			return
 		}
 
-		fmt.Printf("Received person: Name=%v, password=%v\n", u.Name, u.Password)
+		// fmt.Printf("Received person: Name=%v, password=%v\n", u.Name, u.Password)
 
 		resp, err := h.userService.Register(*u)
 		if err != nil {
@@ -44,11 +43,17 @@ func (h *UserHandler) Register() http.HandlerFunc {
 
 func (h *UserHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var user model.UserRegistration
-		resp, err := h.userService.Login(user)
+		u, err := helper.HandleBody[model.UserLogin](&w, r)
 		if err != nil {
+			helper.JsonResponse(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		w.Write([]byte(resp))
+
+		resp, err := h.userService.Login(*u)
+		if err != nil {
+			helper.JsonResponse(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		helper.JsonResponse(w, resp, http.StatusOK)
 	}
 }

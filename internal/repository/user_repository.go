@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/Vladimir5577/go_shop_meat_factures/internal/model"
@@ -12,7 +11,7 @@ import (
 
 type UserRepositoryInterface interface {
 	Register(model.UserRegistration) (string, error)
-	Login(model.UserRegistration) (string, error)
+	Login(model.UserLogin) (model.UserLogin, error)
 	NameExist(model.UserRegistration) (bool, error)
 	PhoneExist(model.UserRegistration) (bool, error)
 }
@@ -28,14 +27,50 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 func (u *UserRepository) Register(user model.UserRegistration) (string, error) {
-	if time.Now().Unix()%2 == 0 {
-		return "Success", nil
+	query, args, err := squirrel.Insert("users").
+		PlaceholderFormat(squirrel.Dollar).
+		Columns("name", "password", "phone", "address").
+		Values(user.Name, user.Password, user.Phone, user.Address).
+		Suffix("RETURNING id").
+		ToSql()
+
+	if err != nil {
+		return "", err
 	}
-	return "Register page from reposityr", errors.New("something went wrong")
+
+	res, err := u.Db.Exec(query, args...)
+	if err != nil {
+		return "", err
+	}
+	rowAffected, err := res.RowsAffected()
+	if err != nil {
+		return "", err
+	}
+	if rowAffected != 1 {
+		return "", errors.New("user not registered, something went wrong")
+	}
+
+	return "Registered successfully", nil
 }
 
-func (u *UserRepository) Login(user model.UserRegistration) (string, error) {
-	return "Login page from repository", nil
+func (u *UserRepository) Login(user model.UserLogin) (model.UserLogin, error) {
+	var userLogined model.UserLogin
+	query, args, err := squirrel.Select("name", "password", "phone").
+		From("users").
+		PlaceholderFormat(squirrel.Dollar).
+		Where((fmt.Sprintf("%s = ?", "phone")), user.Phone).
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return userLogined, err
+	}
+
+	row := u.Db.QueryRow(query, args...)
+	err = row.Scan(&userLogined.Name, &userLogined.Password, &userLogined.Phone)
+	if err != nil {
+		return userLogined, errors.New("wrong credentials")
+	}
+	return userLogined, nil
 }
 
 func (u *UserRepository) NameExist(user model.UserRegistration) (bool, error) {
@@ -51,7 +86,7 @@ func (u *UserRepository) NameExist(user model.UserRegistration) (bool, error) {
 	}
 
 	row := u.Db.QueryRow(query, args...)
-	err = row.Scan(&userExist.Name)
+	_ = row.Scan(&userExist.Name)
 	// if err != nil {
 	// 	return true, err
 	// }
@@ -76,7 +111,7 @@ func (u *UserRepository) PhoneExist(user model.UserRegistration) (bool, error) {
 	}
 
 	row := u.Db.QueryRow(query, args...)
-	err = row.Scan(&userExist.Phone)
+	_ = row.Scan(&userExist.Phone)
 	// if err != nil {
 	// 	return true, err
 	// }
