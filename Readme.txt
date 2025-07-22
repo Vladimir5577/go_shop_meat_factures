@@ -1,5 +1,6 @@
 Install dependencies:
     $ go get -u github.com/go-chi/chi/v5
+    $ go get github.com/go-playground/validator/v10
 
 // ===================================
 Live reload;
