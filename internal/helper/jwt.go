@@ -5,6 +5,7 @@ import "github.com/golang-jwt/jwt/v5"
 const jwtSecret = "test"
 
 type JWTData struct {
+	Id   int64
 	Name string
 }
 
@@ -20,6 +21,7 @@ func NewJWT() *jWT {
 
 func (j *jWT) Create(data JWTData) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":   data.Id,
 		"name": data.Name,
 	})
 	s, err := t.SignedString([]byte(j.Secret))
@@ -36,8 +38,10 @@ func (j *jWT) Parse(token string) (bool, *JWTData) {
 	if err != nil {
 		return false, nil
 	}
+	idFloat64 := t.Claims.(jwt.MapClaims)["id"].(float64)
 	name := t.Claims.(jwt.MapClaims)["name"]
 	return t.Valid, &JWTData{
+		Id:   int64(idFloat64),
 		Name: name.(string),
 	}
 

@@ -10,7 +10,7 @@ import (
 )
 
 type UserRepositoryInterface interface {
-	Register(model.UserRegistration) (string, error)
+	Register(model.UserRegistration) (int64, error)
 	Login(model.UserLogin) (model.UserLogin, error)
 	NameExist(model.UserRegistration) (bool, error)
 	PhoneExist(model.UserRegistration) (bool, error)
@@ -26,7 +26,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	}
 }
 
-func (u *UserRepository) Register(user model.UserRegistration) (string, error) {
+func (u *UserRepository) Register(user model.UserRegistration) (int64, error) {
 	query, args, err := squirrel.Insert("users").
 		PlaceholderFormat(squirrel.Dollar).
 		Columns("name", "password", "phone", "address").
@@ -35,22 +35,16 @@ func (u *UserRepository) Register(user model.UserRegistration) (string, error) {
 		ToSql()
 
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
-	res, err := u.Db.Exec(query, args...)
+	var lastInsertedId int64
+	err = u.Db.QueryRow(query, args...).Scan(&lastInsertedId)
 	if err != nil {
-		return "", err
-	}
-	rowAffected, err := res.RowsAffected()
-	if err != nil {
-		return "", err
-	}
-	if rowAffected != 1 {
-		return "", errors.New("user not registered, something went wrong")
+		return 0, err
 	}
 
-	return "Registered successfully", nil
+	return lastInsertedId, nil
 }
 
 func (u *UserRepository) Login(user model.UserLogin) (model.UserLogin, error) {

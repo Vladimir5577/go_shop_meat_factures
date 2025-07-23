@@ -51,14 +51,16 @@ func (u *UserService) Register(user model.UserRegistration) (model.AuthResponse,
 	}
 
 	user.Password = string(hashedPassword)
-	token, err := helper.NewJWT().Create(helper.JWTData{
-		Name: user.Name,
-	})
+
+	lastInsertedId, err := u.userRepository.Register(user)
 	if err != nil {
 		return authResponse, err
 	}
 
-	_, err = u.userRepository.Register(user)
+	token, err := helper.NewJWT().Create(helper.JWTData{
+		Id:   lastInsertedId,
+		Name: user.Name,
+	})
 	if err != nil {
 		return authResponse, err
 	}

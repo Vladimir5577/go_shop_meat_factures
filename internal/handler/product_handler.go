@@ -8,8 +8,7 @@ import (
 )
 
 type ProductHandlerInterface interface {
-	Register() http.HandlerFunc
-	Login() http.HandlerFunc
+	GetAllProducts() http.HandlerFunc
 }
 
 type ProductHandler struct {

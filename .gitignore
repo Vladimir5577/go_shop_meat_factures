@@ -1,2 +1,4 @@
 tmp/*
 .env
+cmd/*
+!cmd/main.go

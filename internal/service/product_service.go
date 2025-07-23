@@ -20,7 +20,6 @@ func NewProductService(productRepository repository.ProductRepositoryInterface) 
 }
 
 func (p *ProductService) GetAllProducts() ([]model.ProductResponse, error) {
-	// var products model.ProductResponse
 	resp, err := p.productRepository.GetAllProducts()
 	if err != nil {
 		return resp, err

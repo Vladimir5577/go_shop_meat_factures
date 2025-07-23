@@ -39,7 +39,6 @@ CREATE TABLE products (
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
-    order_products INT,
     total_summ NUMERIC CHECK (total_summ > 0),
     status VARCHAR(20) CHECK (status IN ('new', 'confirmed', 'processing', 'processed', 'sended', 'received')),
     comment TEXT,

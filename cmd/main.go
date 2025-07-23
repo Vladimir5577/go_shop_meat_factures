@@ -7,6 +7,7 @@ import (
 
 	"github.com/Vladimir5577/go_shop_meat_factures/internal/config"
 	"github.com/Vladimir5577/go_shop_meat_factures/internal/handler"
+	authMiddleware "github.com/Vladimir5577/go_shop_meat_factures/internal/middleware"
 	"github.com/Vladimir5577/go_shop_meat_factures/internal/repository"
 	"github.com/Vladimir5577/go_shop_meat_factures/internal/service"
 	"github.com/go-chi/chi"
@@ -35,6 +36,10 @@ func main() {
 	productService := service.NewProductService(productRepository)
 	productHandler := handler.NewProductHandler(productService)
 
+	orderRepository := repository.NewOrderRepository(db)
+	orderService := service.NewOrderService(orderRepository)
+	orderHandler := handler.NewOrderHandler(orderService)
+
 	// Home page.
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Welcome to Meet factures."))
@@ -44,6 +49,8 @@ func main() {
 	r.Post("/login", userHandler.Login())
 
 	r.Get("/products", productHandler.GetAllProducts())
+
+	r.With(authMiddleware.IsAuthed).Post("/orders", orderHandler.CreateOrder())
 
 	fmt.Println("Server up and running on the port", envConfigs.ServicePort)
 	http.ListenAndServe(":"+envConfigs.ServicePort, r)

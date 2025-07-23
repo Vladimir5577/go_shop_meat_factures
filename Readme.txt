@@ -17,4 +17,34 @@ Run project with air:
     $ ~/go/bin/air
 
 
-select products.id, products.name, categories.name as wer from products left join categories on products.category_id = categories.id
+// ====================================
+
+fmt.Printf("%#v", myStruct)
+
+POST /products
+
+{
+    "products": [
+        {
+            "product_id": 1,
+            "amount": 3
+        },
+        {
+            "product_id": 2,
+            "amount": 7
+        },
+        {
+            "product_id": 5,
+            "amount": 4
+        },
+        {
+            "product_id": 6,
+            "amount": 2
+        },
+        {
+            "product_id": 10,
+            "amount": 7
+        }
+    ],
+    "comment": "My order!"
+}

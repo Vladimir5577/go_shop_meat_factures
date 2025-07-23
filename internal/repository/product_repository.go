@@ -22,27 +22,17 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 	}
 }
 
-func (p *ProductRepository) CountRows() (uint64, error) {
-	var count uint64
-	sqlQuery := "SELECT COUNT(id) FROM products "
-	err := p.Db.QueryRow(sqlQuery).Scan(&count)
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
-}
-
 func (p *ProductRepository) GetAllProducts() ([]model.ProductResponse, error) {
 	var product model.ProductResponse
+	var category model.ProductCategory
 	var products []model.ProductResponse
 
-	builderProduct := squirrel.Select("id", "name", "description", "price", "in_stock", "is_active", "created_at", "updated_at").
+	builderProduct := squirrel.Select("products.id", "products.name", "products.description", "products.price", "products.in_stock", "products.is_active", "products.created_at", "products.updated_at", "categories.id", "categories.name as category_name").
 		From("products").
 		PlaceholderFormat(squirrel.Dollar).
-		Where((fmt.Sprintf("%s = ?", "is_active")), true).
-		Join("categories WHERE (category_id = )").
-		OrderBy(fmt.Sprintf("%s %s", "id", "ASC"))
+		Where((fmt.Sprintf("%s = ?", "products.is_active")), true).
+		Join("categories on products.category_id = categories.id").
+		OrderBy(fmt.Sprintf("%s %s", "products.id", "ASC"))
 
 	query, args, err := builderProduct.ToSql()
 	if err != nil {
@@ -55,7 +45,7 @@ func (p *ProductRepository) GetAllProducts() ([]model.ProductResponse, error) {
 	}
 
 	for rows.Next() {
-		err = rows.Scan(&product.Id, &product.Name, &product.Description, &product.Price, &product.InStock, &product.IsActive, &product.Created, &product.Updated)
+		err = rows.Scan(&product.Id, &product.Name, &product.Description, &product.Price, &product.InStock, &product.IsActive, &product.Created, &product.Updated, &category.Id, &category.Name)
 		if err != nil {
 			return products, err
 		}
@@ -65,6 +55,7 @@ func (p *ProductRepository) GetAllProducts() ([]model.ProductResponse, error) {
 			Name:        product.Name,
 			Description: product.Description,
 			Price:       product.Price,
+			Category:    category,
 			InStock:     product.InStock,
 			IsActive:    product.IsActive,
 			Created:     product.Created,
