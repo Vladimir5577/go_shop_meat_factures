@@ -1,15 +1,13 @@
 package service
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/Vladimir5577/go_shop_meat_factures/internal/model"
 	"github.com/Vladimir5577/go_shop_meat_factures/internal/repository"
 )
 
 type OrderServiceInterface interface {
 	CreateOrder(model.Ordering) (string, error)
+	GetOrdersByUser(uint) ([]model.OrderResponse, error)
 }
 
 type OrderService struct {
@@ -23,16 +21,18 @@ func NewOrderService(orderRepository repository.OrderRepositoryInterface) *Order
 }
 
 func (o *OrderService) CreateOrder(ordering model.Ordering) (string, error) {
-	for _, pr := range ordering.Products {
-		exist, err := o.orderRepository.CheckProductExist(pr.ProductId)
-		if !exist {
-			return "", errors.New(fmt.Sprintf("Product with id = %v does not exist!", pr.ProductId))
-		}
+	for k, pr := range ordering.Products {
+		product, err := o.orderRepository.GetProductById(pr.ProductId)
 		if err != nil {
 			return "", err
 		}
-		fmt.Println(pr.ProductId)
+
+		summItem := float32(pr.Amount) * product.Price
+		ordering.Products[k].SummItem = summItem
+		ordering.TotalSumm += summItem
 	}
+
+	ordering.Status = "new"
 
 	resp, err := o.orderRepository.CreateOrder(ordering)
 	// if err != nil {
@@ -40,4 +40,8 @@ func (o *OrderService) CreateOrder(ordering model.Ordering) (string, error) {
 	// }
 
 	return resp, err
+}
+
+func (o *OrderService) GetOrdersByUser(userId uint) ([]model.OrderResponse, error) {
+	return o.orderRepository.GetOrdersByUser(userId)
 }

@@ -49,7 +49,7 @@ func (u *UserRepository) Register(user model.UserRegistration) (int64, error) {
 
 func (u *UserRepository) Login(user model.UserLogin) (model.UserLogin, error) {
 	var userLogined model.UserLogin
-	query, args, err := squirrel.Select("name", "password", "phone").
+	query, args, err := squirrel.Select("id", "name", "password", "phone").
 		From("users").
 		PlaceholderFormat(squirrel.Dollar).
 		Where((fmt.Sprintf("%s = ?", "phone")), user.Phone).
@@ -60,7 +60,7 @@ func (u *UserRepository) Login(user model.UserLogin) (model.UserLogin, error) {
 	}
 
 	row := u.Db.QueryRow(query, args...)
-	err = row.Scan(&userLogined.Name, &userLogined.Password, &userLogined.Phone)
+	err = row.Scan(&userLogined.Id, &userLogined.Name, &userLogined.Password, &userLogined.Phone)
 	if err != nil {
 		return userLogined, errors.New("wrong credentials")
 	}

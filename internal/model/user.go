@@ -19,6 +19,7 @@ type UserRegistration struct {
 }
 
 type UserLogin struct {
+	Id       uint   `json:"id"`
 	Name     string `json:"name"`
 	Password string `json:"password" validate:"required,min=3,max=20"`
 	Phone    string `json:"phone" validate:"required,min=5,max=20"`

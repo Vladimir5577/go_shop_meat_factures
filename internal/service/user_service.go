@@ -85,6 +85,7 @@ func (u *UserService) Login(user model.UserLogin) (model.AuthResponse, error) {
 	}
 
 	token, err := helper.NewJWT().Create(helper.JWTData{
+		Id:   int64(userLogined.Id),
 		Name: user.Name,
 	})
 	if err != nil {

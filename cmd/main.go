@@ -51,6 +51,7 @@ func main() {
 	r.Get("/products", productHandler.GetAllProducts())
 
 	r.With(authMiddleware.IsAuthed).Post("/orders", orderHandler.CreateOrder())
+	r.Get("/orders", orderHandler.GetOrdersByUser())
 
 	fmt.Println("Server up and running on the port", envConfigs.ServicePort)
 	http.ListenAndServe(":"+envConfigs.ServicePort, r)
